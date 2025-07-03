@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriTracker - Your Personal Nutrition Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>NutriTracker</span>
+                </div>
+                <div class="nav-menu" id="navMenu">
+                    <button class="nav-item" onclick="showSection('dashboard')" id="dashboardBtn">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </button>
+                    <button class="nav-item" onclick="showSection('activities')" id="activitiesBtn">
+                        <i class="fas fa-running"></i> Activities
+                    </button>
+                    <button class="nav-item" onclick="showSection('food')" id="foodBtn">
+                        <i class="fas fa-utensils"></i> Food Log
+                    </button>
+                    <button class="nav-item" onclick="showSection('profile')" id="profileBtn">
+                        <i class="fas fa-user"></i> Profile
+                    </button>
+                    <button class="nav-item logout-btn" onclick="logout()" id="logoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Authentication Section -->
+        <div id="authSection" class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1><i class="fas fa-heartbeat"></i> NutriTracker</h1>
+                    <p>Your personal nutrition and fitness assistant</p>
+                </div>
+                
+                <div class="auth-tabs">
+                    <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+                    <button class="tab-btn" onclick="switchTab('register')">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="auth-form">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="loginUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="auth-form" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> Username</label>
+                            <input type="text" id="regUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-envelope"></i> Email</label>
+                            <input type="email" id="regEmail" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    
+                    <h3>Personal Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Age</label>
+                            <input type="number" id="regAge" min="1" max="120" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-weight"></i> Weight (kg)</label>
+                            <input type="number" id="regWeight" min="1" step="0.1" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fas fa-ruler-vertical"></i> Height (cm)</label>
+                            <input type="number" id="regHeight" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-venus-mars"></i> Gender</label>
+                            <select id="regGender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-running"></i> Activity Level</label>
+                        <select id="regActivityLevel" required>
+                            <option value="sedentary">Sedentary (little to no exercise)</option>
+                            <option value="lightly_active">Lightly Active (light exercise 1-3 days/week)</option>
+                            <option value="moderately_active" selected>Moderately Active (moderate exercise 3-5 days/week)</option>
+                            <option value="very_active">Very Active (hard exercise 6-7 days/week)</option>
+                            <option value="extremely_active">Extremely Active (very hard exercise, physical job)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-medkit"></i> Health Conditions (Optional)</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" value="diabetes"> Diabetes</label>
+                            <label><input type="checkbox" value="heart_disease"> Heart Disease</label>
+                            <label><input type="checkbox" value="hypertension"> Hypertension</label>
+                            <label><input type="checkbox" value="obesity"> Obesity</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="mainApp" class="main-app" style="display: none;">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <div class="section-header">
+                    <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+                    <p>Your daily nutrition and activity overview</p>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="stat-card calories-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Calories</h3>
+                            <div class="stat-values">
+                                <span id="caloriesConsumed">0</span> / <span id="caloriesNeeded">0</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="caloriesProgress"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card activities-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-running"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Activities Today</h3>
+                            <div class="stat-value" id="activitiesCount">0</div>
+                            <div class="stat-subtitle" id="activitiesCalories">0 calories burned</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card deficit-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>Calorie Balance</h3>
+                            <div class="stat-value" id="calorieDeficit">0</div>
+                            <div class="stat-subtitle" id="deficitStatus">Perfect balance</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-sections">
+                    <div class="dashboard-section">
+                        <h3><i class="fas fa-utensils"></i> Today's Meals</h3>
+                        <div id="todaysMeals" class="meals-list">
+                            <!-- Meals will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <h3><i class="fas fa-lightbulb"></i> Recommendations</h3>
+                        <div id="recommendations" class="recommendations-list">
+                            <!-- Recommendations will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Activities Section -->
+            <section id="activities" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-running"></i> Activity Tracking</h2>
+                    <p>Log your physical activities and track calories burned</p>
+                </div>
+
+                <div class="activity-form-card">
+                    <h3>Log New Activity</h3>
+                    <form id="activityForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Activity Type</label>
+                                <select id="activityType" required>
+                                    <option value="">Select Activity</option>
+                                    <option value="walking">Walking</option>
+                                    <option value="running">Running</option>
+                                    <option value="cycling">Cycling</option>
+                                    <option value="swimming">Swimming</option>
+                                    <option value="strength_training">Strength Training</option>
+                                    <option value="yoga">Yoga</option>
+                                    <option value="dancing">Dancing</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Duration (minutes)</label>
+                                <input type="number" id="activityDuration" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Intensity</label>
+                                <select id="activityIntensity" required>
+                                    <option value="low">Low</option>
+                                    <option value="moderate" selected>Moderate</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="activityDate" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Log Activity
+                        </button>
+                    </form>
+                </div>
+
+                <div class="activities-history">
+                    <h3>Recent Activities</h3>
+                    <div id="activitiesList" class="activities-list">
+                        <!-- Activities will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Food Section -->
+            <section id="food" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-utensils"></i> Food Tracking</h2>
+                    <p>Log your meals and track nutritional intake</p>
+                </div>
+
+                <div class="food-form-card">
+                    <h3>Log Food Intake</h3>
+                    <form id="foodForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Search Food</label>
+                                <input type="text" id="foodSearch" placeholder="Type to search foods..." autocomplete="off">
+                                <div id="foodSuggestions" class="food-suggestions"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Quantity (grams)</label>
+                                <input type="number" id="foodQuantity" min="1" step="0.1" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Meal Type</label>
+                                <select id="mealType" required>
+                                    <option value="breakfast">Breakfast</option>
+                                    <option value="lunch">Lunch</option>
+                                    <option value="dinner">Dinner</option>
+                                    <option value="snack">Snack</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Date</label>
+                                <input type="date" id="foodDate" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Log Food
+                        </button>
+                    </form>
+                </div>
+
+                <div class="food-history">
+                    <h3>Today's Food Intake</h3>
+                    <div id="foodsList" class="foods-list">
+                        <!-- Foods will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile" class="section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user"></i> User Profile</h2>
+                    <p>Manage your personal information and health data</p>
+                </div>
+
+                <div class="profile-card">
+                    <div id="profileInfo">
+                        <!-- Profile information will be populated here -->
+                    </div>
+                </div>
+
+                <div class="calorie-info-card">
+                    <h3><i class="fas fa-calculator"></i> Calorie Information</h3>
+                    <div id="calorieInfo">
+                        <!-- Calorie breakdown will be populated here -->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Processing...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
